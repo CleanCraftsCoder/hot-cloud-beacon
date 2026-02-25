@@ -2,12 +2,14 @@ const Score = require('../models/score');
 
 exports.saveScore = async (req, res) => {
   try {
-    const { username, score } = req.body;
+    // enforce that only authenticated session user can save a score
+    const sessionUser = req.session && req.session.user;
+    const { score } = req.body;
 
-    if (!username || score == null)
-      return res.status(400).json({ message: "Invalid data" });
+    if (!sessionUser || score == null)
+      return res.status(400).json({ message: "Invalid data or not authenticated" });
 
-    const newScore = await Score.create({ username, score });
+    const newScore = await Score.create({ username: sessionUser, score });
 
     res.status(201).json(newScore);
   } catch (err) {
